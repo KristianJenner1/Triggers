@@ -13,19 +13,20 @@ public with sharing class TaskService
     // member variables
     public Id taskOwner;
     public List<Task> tasksToInsert;
-    public List<Task> tasks;
+    public Map<Id,Task> oldTasksMap;
+    public Map<Id,Task> newTasksMap;
 
     // no argument constructor
     public TaskService() 
     {
         this.taskOwner = UserInfo.getUserId();
         this.tasksToInsert = new List<Task>();
-        this.tasks = new List<Task>();
     }
 
-    public TaskService(List<Task> tasks) 
+    public TaskService(Map<Id,Task> oldTasksMap, Map<Id,Task> newTasksMap) 
     {
-        this.tasks = tasks;
+        this.oldTasksMap = oldTasksMap;
+        this.newTasksMap = newTasksMap;
     }
 
     /**************************************************************************************
@@ -68,15 +69,33 @@ public with sharing class TaskService
     }
 
     /**************************************************************************************
+    * @Description  method to return tasks with a Completed status, comparing old and new
+    * @Return       List<Task>
+    **************************************************************************************/ 
+    public List<Task> getCompletedTasks()
+    {
+        List<Task> completedTasks = new List<Task>();
+        // compare task status in new/old to check for newly completed tasks
+        for (Task task : newTasksMap.values()) 
+        {
+            if (task.status == TASK_STATUS_COMPLETED && oldTasksMap.get(task.Id).status != TASK_STATUS_COMPLETED) 
+            {
+                completedTasks.add(task);
+            }
+       }
+       return completedTasks;
+    }
+
+    /**************************************************************************************
     * @Description  method to get Opportunities related to tasks to reduce in value
     * @Return       List<Opportunity>
     **************************************************************************************/ 
-    public List<Opportunity> getRelatedOppsforReduceValueTasks()
+    public List<Opportunity> getRelatedOppsforReduceValueTasks(List<Task> reduceValueTasks)
     {   
         List<Opportunity> opportunities = new List<Opportunity>();
         List<ID> opptyIDs = new List<ID>();
 
-        for (Task task : tasks)
+        for (Task task : reduceValueTasks)
         {
             if (task.subject == TASK_SUBJECT_REDUCE_VALUE && task.status == TASK_STATUS_COMPLETED && task.WhatId.getSObjectType() == Opportunity.sObjectType)
             {
