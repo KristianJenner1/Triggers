@@ -9,8 +9,8 @@ trigger Task_au on Task (after update)
     private static Decimal reduction = 0.5; // amount to reduce related opportuities by
     
     // 1.1 fitler Tasks that have changed to Completed
-    TaskService TaskService = New TaskService(trigger.oldMap,trigger.newMap);
-    List<Task> newlyCompletedTasks = TaskService.getCompletedTasks();
+    TaskService TaskService = New TaskService();
+    List<Task> newlyCompletedTasks = TaskService.getCompletedTasks(trigger.oldMap,trigger.newMap);
 
     // 1.2 get related Opportunities for the Tasks
     List<Opportunity> oppsToReduce = TaskService.getRelatedOppsforReduceValueTasks(newlyCompletedTasks);
@@ -18,11 +18,8 @@ trigger Task_au on Task (after update)
     // 1.3 update the Opportunity amount by the reduction (decimal)
     if (oppsToReduce.size() > 0)
     {
-        OpportunityService OpportunityService = new OpportunityService(oppsToReduce);
-        OpportunityService.reduceOpportunitiesValue(reduction);
-        OpportunityService.updateOpportunities();
+        OpportunityService OpportunityService = new OpportunityService();
+        OpportunityService.reduceOpportunitiesValue(reduction, oppsToReduce);
     }
-
-
 
 }

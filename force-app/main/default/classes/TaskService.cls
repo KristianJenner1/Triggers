@@ -12,21 +12,11 @@ public with sharing class TaskService
 
     // member variables
     public Id taskOwner;
-    public List<Task> tasksToInsert;
-    public Map<Id,Task> oldTasksMap;
-    public Map<Id,Task> newTasksMap;
 
     // no argument constructor
     public TaskService() 
     {
         this.taskOwner = UserInfo.getUserId();
-        this.tasksToInsert = new List<Task>();
-    }
-
-    public TaskService(Map<Id,Task> oldTasksMap, Map<Id,Task> newTasksMap) 
-    {
-        this.oldTasksMap = oldTasksMap;
-        this.newTasksMap = newTasksMap;
     }
 
     /**************************************************************************************
@@ -52,11 +42,12 @@ public with sharing class TaskService
     }
 
     /**************************************************************************************
-    * @Description  private method to create a task linked to supplied SObject List
+    * @Description  private method to create a task linked to each supplied SObject
     * @Return       void
     **************************************************************************************/ 
     private void createTasksForSObjects(List<Sobject> objects, String taskSubject, Date dueDate)
     {   
+        List<Task> tasksToInsert = new List<Task>();
         for (SObject obj : objects)
         {
             Task task = new Task();
@@ -64,7 +55,11 @@ public with sharing class TaskService
             task.subject = taskSubject;
             task.ActivityDate = dueDate;
             task.OwnerId = taskOwner;
-            this.tasksToInsert.add(task);
+            tasksToInsert.add(task);
+        }
+        if (tasksToInsert.size() > 0)
+        {
+            insert tasksToInsert;
         }
     }
 
@@ -72,7 +67,7 @@ public with sharing class TaskService
     * @Description  method to return tasks with a Completed status, comparing old and new
     * @Return       List<Task>
     **************************************************************************************/ 
-    public List<Task> getCompletedTasks()
+    public List<Task> getCompletedTasks(Map<Id,Task> oldTasksMap, Map<Id,Task> newTasksMap)
     {
         List<Task> completedTasks = new List<Task>();
         // compare task status in new/old to check for newly completed tasks
@@ -92,9 +87,7 @@ public with sharing class TaskService
     **************************************************************************************/ 
     public List<Opportunity> getRelatedOppsforReduceValueTasks(List<Task> reduceValueTasks)
     {   
-        List<Opportunity> opportunities = new List<Opportunity>();
         List<ID> opptyIDs = new List<ID>();
-
         for (Task task : reduceValueTasks)
         {
             if (task.subject == TASK_SUBJECT_REDUCE_VALUE && task.status == TASK_STATUS_COMPLETED && task.WhatId.getSObjectType() == Opportunity.sObjectType)
@@ -103,6 +96,7 @@ public with sharing class TaskService
             }
         }
 
+        List<Opportunity> opportunities = new List<Opportunity>();
         if (opptyIDs.size() > 0)
         {
             opportunities = [
@@ -114,18 +108,5 @@ public with sharing class TaskService
         
         return opportunities;
     }
-
-    /**************************************************************************************
-    * @Description  method insert the tasks
-    * @Return       void
-    **************************************************************************************/ 
-    public void insertTasks()
-    {
-        if (tasksToInsert.size() > 0)
-        {
-            insert tasksToInsert;
-        }
-    }
-
 
 }

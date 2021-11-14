@@ -9,7 +9,7 @@ trigger Opportunity_ai on Opportunity (after insert)
     TaskService TaskService = new TaskService();
     
     // 1.1 create 'follow up' tasks for all opportunities
-    TaskService.createFollowUpTasksForSobjects(trigger.New, 10);
+    TaskService.createFollowUpTasksForSobjects(trigger.new, 10);
 
     // 1.2 create 'reduce value' tasks for opportunities where amount > 500000
     List<Opportunity> opportunitiesToReduce = new List<Opportunity>();
@@ -24,8 +24,5 @@ trigger Opportunity_ai on Opportunity (after insert)
     {
         TaskService.createReduceValueTasksForSobjects(opportunitiesToReduce, 2);
     }
-
-    // 1.3 insert new Tasks
-    TaskService.insertTasks();
 
 }
