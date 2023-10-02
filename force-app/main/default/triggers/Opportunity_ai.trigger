@@ -20,6 +20,7 @@ trigger Opportunity_ai on Opportunity (after insert)
             opportunitiesToReduce.add(opp);
         }
     }
+    
     if (opportunitiesToReduce.size() > 0)
     {
         TaskService.createReduceValueTasksForSobjects(opportunitiesToReduce, 2);

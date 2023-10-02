@@ -87,6 +87,7 @@ public with sharing class TaskService
     **************************************************************************************/ 
     public List<Opportunity> getRelatedOppsforReduceValueTasks(List<Task> reduceValueTasks)
     {   
+        // get list of Opportunity Ids related to completed 'Reduce Value' tasks
         List<ID> opptyIDs = new List<ID>();
         for (Task task : reduceValueTasks)
         {
@@ -96,6 +97,7 @@ public with sharing class TaskService
             }
         }
 
+        // return the Opportunities linked to the tasks
         List<Opportunity> opportunities = new List<Opportunity>();
         if (opptyIDs.size() > 0)
         {

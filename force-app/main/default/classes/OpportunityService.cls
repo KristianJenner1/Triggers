@@ -4,6 +4,8 @@
 *******************************************************************************************/
 public with sharing class OpportunityService 
 {
+
+    // no argument constructor
     public OpportunityService() 
     {
     }
